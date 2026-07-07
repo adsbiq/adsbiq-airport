@@ -51,9 +51,9 @@ Name: "{group}\ADSBiq live map"; Filename: "{#AppURL}"
 Name: "{group}\Uninstall ADSBiq Feeder"; Filename: "{uninstallexe}"
 
 [Run]
-; 1) bind WinUSB to the dongle (silent). -b: don't pop the Zadig UI; runs only if present.
+; 1) bind WinUSB to the dongle silently (--silent = no Zadig UI). Self-contained exe.
 Filename: "{app}\driver\wdi-simple.exe"; \
-  Parameters: "--vid {#RtlVid} --pid {#RtlPid} --type 0 -b -n ""RTL2832U"""; \
+  Parameters: "--vid {#RtlVid} --pid {#RtlPid} --type 0 --silent --name ""RTL2832U"""; \
   StatusMsg: "Installing USB driver for your dongle..."; \
   Flags: runhidden waituntilterminated skipifdoesntexist
 ; 2) install + start the background service (config written in CurStepChanged)

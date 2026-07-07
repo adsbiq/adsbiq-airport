@@ -26,7 +26,7 @@ installer/
 |---|---|
 | `adsbiq-feed-agent.exe` | `cd agent && GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o adsbiq-feed-agent.exe` |
 | `decoders/dumpvdl2.exe` + DLLs | GitHub Actions **build-decoders → dumpvdl2-windows-amd64** artifact (unzip into `decoders/`) |
-| `driver/wdi-simple.exe` + DLLs | GitHub Actions **build-decoders → wdi-simple-windows-amd64** artifact |
+| `driver/wdi-simple.exe` | GitHub Actions **build-decoders → wdi-simple-windows-amd64** artifact (single self-contained exe, WinUSB driver embedded — no DLLs) |
 | `service/WinSW.exe` | [WinSW v3](https://github.com/winsw/winsw/releases) `WinSW-x64.exe`, renamed `WinSW.exe` (MIT) |
 | `decoders/dump1090.exe` | **TODO** — not yet built (see below) |
 
