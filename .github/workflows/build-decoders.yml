@@ -111,29 +111,23 @@ jobs:
             autotools
             mingw-w64-x86_64-toolchain
 
-      - name: Fetch libwdi + driver redistributables
+      - name: Fetch libwdi + WDK redistributable
         shell: cmd
         run: |
           git clone --depth 1 https://github.com/pbatard/libwdi
           cd libwdi
           curl -L "https://go.microsoft.com/fwlink/p/?LinkID=253170" -o wdk-redist.msi
-          curl -L "https://github.com/mcuee/libusb-win32/releases/download/release_1.4.0.0/libusb-win32-bin-1.4.0.0.zip" -o libusb0-redist.zip
-          curl -L "https://github.com/mcuee/libusbk/releases/download/V3.1.0.0/libusbK-3.1.0.0-bin.7z" -o libusbk-redist.7z
           msiexec /a wdk-redist.msi /qn TARGETDIR=%CD%\wdk
-          7z x libusb0-redist.zip
-          7z x libusbk-redist.7z
-          move libusb-win32* libusb0
-          move libusbK* libusbk
 
-      - name: Build wdi-simple.exe
+      - name: Build wdi-simple.exe (WinUSB only)
         run: |
           set -euxo pipefail
           cd libwdi
           ./bootstrap.sh
+          # We only install WinUSB (--type 0); skip the libusb0/libusbK backends.
           ./configure --build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 \
             --enable-toggable-debug --enable-examples-build --disable-debug --disable-shared --disable-32bit \
-            --with-wdkdir="wdk/Windows Kits/8.0" --with-wdfver=1011 \
-            --with-libusb0="libusb0" --with-libusbk="libusbk/bin"
+            --with-wdkdir="wdk/Windows Kits/8.0" --with-wdfver=1011
           make
           mkdir -p ../dist/wdi-simple-windows-amd64
           cp examples/wdi-simple.exe ../dist/wdi-simple-windows-amd64/
