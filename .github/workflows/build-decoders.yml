@@ -47,7 +47,10 @@ jobs:
       - name: Build dumpvdl2 (RTL-SDR only, extras off)
         run: |
           set -euxo pipefail
+          PATCH="$(pwd)/installer/patches/dumpvdl2-windows.patch"
           git clone --depth 1 https://github.com/szpajder/dumpvdl2 /tmp/dumpvdl2
+          # Port to Windows: POSIX signals + strsep/strndup shim, Winsock UDP output.
+          git -C /tmp/dumpvdl2 apply --ignore-whitespace --verbose "$PATCH"
           cmake -S /tmp/dumpvdl2 -B /tmp/dumpvdl2/build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/mingw64 \
             -DRTLSDR=ON -DSOAPYSDR=OFF -DMIRISDR=OFF -DSDRPLAY=OFF -DSDRPLAY3=OFF \

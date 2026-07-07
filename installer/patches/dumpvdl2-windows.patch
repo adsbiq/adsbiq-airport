@@ -1,0 +1,135 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 97b82e4..509a891 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -262,6 +262,13 @@ add_custom_command(
+ add_subdirectory (asn1)
+ add_subdirectory (libfec)
+ 
++if(WIN32)
++	# Force-include the POSIX/GNU compatibility shim into every dumpvdl2 TU and
++	# link Winsock for the UDP output.
++	add_compile_options(-include ${CMAKE_CURRENT_SOURCE_DIR}/win_compat.h)
++	list(APPEND dumpvdl2_extra_libs ws2_32)
++endif()
++
+ add_library (dumpvdl2_base OBJECT
+ 	acars.c
+ 	ac_data.c
+diff --git a/src/output-udp.c b/src/output-udp.c
+index 1effb12..3a21071 100644
+--- a/src/output-udp.c
++++ b/src/output-udp.c
+@@ -19,15 +19,32 @@
+ 
+ #include <stdio.h>                      // fprintf
+ #include <string.h>                     // strdup, strerror
+-#include <unistd.h>                     // close
+ #include <errno.h>                      // errno
++#ifdef _WIN32
++#include <winsock2.h>                   // socket, connect, send (Winsock)
++#include <ws2tcpip.h>                   // getaddrinfo
++// Winsock needs one-time init; a constructor runs it before any output starts.
++static void __attribute__((constructor)) dumpvdl2_wsa_init(void) {
++	WSADATA wsa;
++	WSAStartup(MAKEWORD(2, 2), &wsa);
++}
++#else
++#include <unistd.h>                     // close
+ #include <sys/types.h>                  // socket, connect
+ #include <sys/socket.h>                 // socket, connect
+ #include <netdb.h>                      // getaddrinfo
++#endif
+ #include "output-common.h"              // output_descriptor_t, output_qentry_t, output_queue_drain
+ #include "kvargs.h"                     // kvargs, option_descr_t
+ #include "dumpvdl2.h"                   // do_exit
+ 
++#ifdef _WIN32
++// On Windows, sockets are closed with closesocket() and written with send();
++// map the POSIX calls used below (scoped to this file only).
++#define close closesocket
++#define write(fd, buf, len) send((fd), (const char *)(buf), (int)(len), 0)
++#endif
++
+ typedef struct {
+ 	char *address;
+ 	char *port;
+diff --git a/src/win_compat.h b/src/win_compat.h
+new file mode 100644
+index 0000000..58371aa
+--- /dev/null
++++ b/src/win_compat.h
+@@ -0,0 +1,73 @@
++/*
++ * Windows / MinGW compatibility shim for dumpvdl2.
++ *
++ * Force-included (compiler -include) on WIN32 builds so the mostly-POSIX source
++ * compiles under mingw-w64 without editing every file. Provides the POSIX signal
++ * API and the GNU string helpers that mingw does not expose. No-op on other
++ * platforms.
++ */
++#ifndef DUMPVDL2_WIN_COMPAT_H
++#define DUMPVDL2_WIN_COMPAT_H
++#ifdef _WIN32
++
++#include <signal.h>
++#include <string.h>
++#include <stdlib.h>
++
++/* --- POSIX signals: Windows lacks sigaction and several signal numbers --- */
++#ifndef SIGHUP
++#define SIGHUP 1
++#endif
++#ifndef SIGQUIT
++#define SIGQUIT 3
++#endif
++#ifndef SIGPIPE
++#define SIGPIPE 13
++#endif
++
++typedef int compat_sigset_t;
++struct sigaction {
++	void (*sa_handler)(int);
++	compat_sigset_t sa_mask;
++	int sa_flags;
++};
++
++static inline int compat_sigaction(int sig, const struct sigaction *act,
++		struct sigaction *old) {
++	(void)old;
++	/* Windows delivers only a subset; wire the ones it supports, ignore the rest. */
++	if (act != NULL && (sig == SIGINT || sig == SIGTERM || sig == SIGABRT)) {
++		signal(sig, act->sa_handler);
++	}
++	return 0;
++}
++#define sigaction(sig, act, old) compat_sigaction((sig), (act), (old))
++
++/* --- GNU string helpers absent under mingw's default feature set --- */
++static inline char *compat_strsep(char **stringp, const char *delim) {
++	char *start = *stringp;
++	char *p = (start != NULL) ? strpbrk(start, delim) : NULL;
++	if (p == NULL) {
++		*stringp = NULL;
++	} else {
++		*p = '\0';
++		*stringp = p + 1;
++	}
++	return start;
++}
++#define strsep(sp, d) compat_strsep((sp), (d))
++
++static inline char *compat_strndup(const char *s, size_t n) {
++	size_t len = strnlen(s, n);
++	char *out = (char *)malloc(len + 1);
++	if (out == NULL) {
++		return NULL;
++	}
++	memcpy(out, s, len);
++	out[len] = '\0';
++	return out;
++}
++#define strndup(s, n) compat_strndup((s), (n))
++
++#endif /* _WIN32 */
++#endif /* DUMPVDL2_WIN_COMPAT_H */
