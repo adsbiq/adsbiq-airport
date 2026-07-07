@@ -36,6 +36,13 @@ ArchitecturesInstallIn64BitMode=x64compatible
 ArchitecturesAllowed=x64compatible
 UninstallDisplayName={#AppName}
 
+[Messages]
+; Onboarding copy — plain language, no jargon. (See PRODUCT_UX.md for the full spec.)
+WelcomeLabel2=In about a minute, your airfield goes live at adsbiq.com/airport — every takeoff, landing, and pattern, in real time.%n%nWe'll set up your dongle and start feeding automatically. No Raspberry Pi, no config, no hassle.
+FinishedHeadingLabel=You're live! 🎉
+FinishedLabelNoIcons=Your airfield is now feeding the ADSBiq network. Aircraft may take a minute to appear on the map.
+FinishedLabel=Your airfield is now feeding the ADSBiq network. Aircraft may take a minute to appear on the map.
+
 [Files]
 ; the agent
 Source: "dist\adsbiq-feed-agent.exe"; DestDir: "{app}"; Flags: ignoreversion
