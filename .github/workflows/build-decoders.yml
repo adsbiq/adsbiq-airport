@@ -152,11 +152,16 @@ jobs:
         shell: bash
         run: git clone --depth 1 https://github.com/gvanem/Dump1090 dump1090src
 
-      - name: Configure + build (CMake, VS2022 x64)
+      - name: Activate MSVC toolchain (x64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Configure + build (Ninja + MSVC)
         shell: pwsh
         run: |
-          cmake -S dump1090src/src -B dump1090src/build -G "Visual Studio 17 2022" -A x64
-          cmake --build dump1090src/build --config Release
+          cmake -S dump1090src/src -B dump1090src/build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          cmake --build dump1090src/build
 
       - name: Collect exe + runtime DLLs
         shell: bash
