@@ -1,8 +1,8 @@
 diff --git a/winstubs.h b/winstubs.h
-index f3ab63f..da6a24a 100644
+index f3ab63f..bea3838 100644
 --- a/winstubs.h
 +++ b/winstubs.h
-@@ -41,6 +41,11 @@
+@@ -41,6 +41,12 @@
  #include <windows.h>
  #include <basetsd.h>
  
@@ -10,11 +10,12 @@ index f3ab63f..da6a24a 100644
 +#include <stdint.h>
 +#include <sys/types.h>
 +#include <unistd.h>
++#include <ws2tcpip.h>   /* socklen_t, inet_pton, getaddrinfo */
 +#else
  typedef UCHAR    uint8_t;
  typedef USHORT   uint16_t;
  typedef UINT32   uint32_t;
-@@ -48,6 +53,7 @@ typedef UINT64   uint64_t;
+@@ -48,6 +54,7 @@ typedef UINT64   uint64_t;
  typedef UINT32   mode_t;
  typedef long     ssize_t;
  typedef int      socklen_t;
@@ -22,7 +23,7 @@ index f3ab63f..da6a24a 100644
  
  #include <stdio.h>
  #include <time.h>
-@@ -65,16 +71,20 @@ typedef int      socklen_t;
+@@ -65,16 +72,20 @@ typedef int      socklen_t;
  extern "C" {
  #endif
  
