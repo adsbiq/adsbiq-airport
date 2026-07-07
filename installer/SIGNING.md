@@ -10,7 +10,7 @@ Signing is load-bearing, not optional. Three things get us there.
 
 SignPath donates code-signing to open-source projects.
 
-- **Eligibility:** public OSS repo (`github.com/adsbiq/adsbiq-airport` ✓) with an
+- **Eligibility:** public OSS repo (`github.com/adsbiq/flightpatch` ✓) with an
   OSI-approved license (`MIT` ✓).
 - **Apply:** <https://signpath.org/> → *Foundation* → submit the project (repo URL,
   license, short description, maintainers). Turnaround is typically 1–2 weeks —

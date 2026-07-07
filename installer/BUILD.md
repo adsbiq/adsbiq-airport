@@ -1,14 +1,14 @@
 # Building the Flightpatch installer
 
-The installer (`adsbiq-airport.iss`, Inno Setup 6) assembles a single
-`adsbiq-airport-setup-<ver>.exe` that installs the driver, the agent, the
+The installer (`flightpatch.iss`, Inno Setup 6) assembles a single
+`flightpatch-setup-<ver>.exe` that installs the driver, the agent, the
 decoders, and a background service. It expects its inputs under `installer/dist/`.
 
 ## Layout the compiler expects
 
 ```
 installer/
-  adsbiq-airport.iss
+  flightpatch.iss
   dist/
     adsbiq-feed-agent.exe          # the Go agent (GOOS=windows GOARCH=amd64)
     decoders/
@@ -37,7 +37,7 @@ VDL2; the ADS-B decoder is picked up automatically once added to `decoders/`.
 
 ```
 cd installer
-iscc adsbiq-airport.iss      # -> installer/out/adsbiq-airport-setup-<ver>.exe
+iscc flightpatch.iss      # -> installer/out/flightpatch-setup-<ver>.exe
 ```
 
 ## What the installed product does

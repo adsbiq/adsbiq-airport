@@ -50,7 +50,7 @@ Because it always dials **out**, nothing needs an open inbound port or a static 
 
 ## Downloads
 Pre-built, single-file binaries for **Windows, macOS (Intel + Apple Silicon), and Linux** are
-published on the [Releases](https://github.com/adsbiq/adsbiq-airport/releases) page. The
+published on the [Releases](https://github.com/adsbiq/flightpatch/releases) page. The
 one-click installer bundles the dongle driver, the decoder(s), and this agent as a background
 service so the whole thing installs and connects with no terminal.
 

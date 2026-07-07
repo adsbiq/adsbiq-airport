@@ -7,7 +7,7 @@
 ;   4. optionally tags the device with the school / FBO name the user typed.
 ;
 ; Build inputs live under installer\dist\ — see installer\BUILD.md for how to
-; assemble them from the CI artifacts. Compile with: iscc adsbiq-airport.iss
+; assemble them from the CI artifacts. Compile with: iscc flightpatch.iss
 
 #define AppName "Flightpatch"
 #define AppVer "0.3.0"
@@ -26,7 +26,7 @@ DefaultDirName={autopf}\ADSBiq
 DefaultGroupName=ADSBiq
 DisableProgramGroupPage=yes
 OutputDir=out
-OutputBaseFilename=adsbiq-airport-setup-{#AppVer}
+OutputBaseFilename=flightpatch-setup-{#AppVer}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-const releasesLatest = "https://api.github.com/repos/adsbiq/adsbiq-airport/releases/latest"
+const releasesLatest = "https://api.github.com/repos/adsbiq/flightpatch/releases/latest"
 
 type ghRelease struct {
 	TagName string `json:"tag_name"`

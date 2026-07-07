@@ -236,7 +236,7 @@ jobs:
       - name: Compile installer
         shell: pwsh
         run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\adsbiq-airport.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer\flightpatch.iss
           Get-ChildItem installer\out
 
       - name: Upload setup.exe
