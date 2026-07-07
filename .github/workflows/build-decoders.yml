@@ -177,7 +177,7 @@ jobs:
           cd /tmp/dump1090
           # Link Winsock for the _WIN32 network code.
           make dump1090 \
-               CFLAGS="$(pkg-config --cflags librtlsdr) -DMISSING_GETTIMEOFDAY -Wno-error=incompatible-pointer-types -Wno-incompatible-pointer-types -Wno-error=int-conversion" \
+               CFLAGS="$(pkg-config --cflags librtlsdr) -DMISSING_GETTIMEOFDAY -Wno-error=incompatible-pointer-types -Wno-incompatible-pointer-types -Wno-error=int-conversion -fcommon" \
                LIBS="$(pkg-config --libs librtlsdr) -lws2_32 -lpthread" || make
           test -f dump1090.exe
 

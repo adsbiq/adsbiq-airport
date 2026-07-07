@@ -1,5 +1,5 @@
 diff --git a/winstubs.h b/winstubs.h
-index f3ab63f..bea3838 100644
+index f3ab63f..7adbef9 100644
 --- a/winstubs.h
 +++ b/winstubs.h
 @@ -41,6 +41,12 @@
@@ -23,7 +23,7 @@ index f3ab63f..bea3838 100644
  
  #include <stdio.h>
  #include <time.h>
-@@ -65,16 +72,20 @@ typedef int      socklen_t;
+@@ -65,19 +72,23 @@ typedef int      socklen_t;
  extern "C" {
  #endif
  
@@ -38,11 +38,24 @@ index f3ab63f..bea3838 100644
  _inline uint64_t strtoll(const char *p, void *e, UINT32 base) {return _atoi64(p);}
 -_inline int inet_aton(const char * cp, DWORD * ulAddr) { *ulAddr = inet_addr(cp); return (INADDR_NONE != *ulAddr);} 
 +#endif
-+_inline int inet_aton(const char * cp, DWORD * ulAddr) { *ulAddr = inet_addr(cp); return (INADDR_NONE != *ulAddr);}
++static _inline int inet_aton(const char * cp, DWORD * ulAddr) { *ulAddr = inet_addr(cp); return (INADDR_NONE != *ulAddr);}
 +#ifndef __MINGW32__
  #define snprintf  _snprintf
  #define vsnprintf _vsnprintf
 +#endif
  #define realpath(N,R) _fullpath((R),(N),_MAX_PATH)
  
- _inline void cls() {
+-_inline void cls() {
++static _inline void cls() {
+     HANDLE hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+     COORD coord = {0, 0};
+     DWORD count;
+@@ -90,7 +101,7 @@ _inline void cls() {
+     SetConsoleCursorPosition(hStdOut, coord);
+ }
+ 
+-_inline int gettimeofday(struct timeval *tv, struct timezone *tz) {
++static _inline int gettimeofday(struct timeval *tv, struct timezone *tz) {
+   SYSTEMTIME stSystemTime;
+   GetLocalTime(&stSystemTime);
+ 
