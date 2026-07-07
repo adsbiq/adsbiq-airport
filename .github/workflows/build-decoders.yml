@@ -143,34 +143,46 @@ jobs:
           path: dist/wdi-simple-windows-amd64
           if-no-files-found: error
 
-  # ADS-B (1090) decoder. gvanem/Dump1090 is a Windows-native fork with librtlsdr
-  # built in, so it builds with CMake + VS2022 (on the runner) — no port needed.
+  # ADS-B (1090) decoder with BEAST output (--net-beast :30005 -> forwarder ->
+  # feed.adsbiq.com:30004). MalcolmRobb/dump1090 is Windows-aware (#ifndef _WIN32)
+  # and Beast-capable; built under MSYS2 like the VDL2 decoder.
   dump1090-windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
     steps:
-      - name: Checkout gvanem/Dump1090
-        shell: bash
-        run: git clone --depth 1 https://github.com/gvanem/Dump1090 dump1090src
-
-      - name: Activate MSVC toolchain (x64)
-        uses: ilammy/msvc-dev-cmd@v1
+      - name: Set up MSYS2 (mingw64)
+        uses: msys2/setup-msys2@v2
         with:
-          arch: x64
+          msystem: MINGW64
+          update: true
+          install: >-
+            git
+            make
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-pkgconf
+            mingw-w64-x86_64-rtl-sdr
+            mingw-w64-x86_64-libusb
 
-      - name: Configure + build (Ninja + MSVC)
-        shell: pwsh
+      - name: Build MalcolmRobb/dump1090 (Beast, RTL-SDR)
         run: |
-          cmake -S dump1090src/src -B dump1090src/build -G Ninja -DCMAKE_BUILD_TYPE=Release
-          cmake --build dump1090src/build
+          set -euxo pipefail
+          git clone --depth 1 https://github.com/MalcolmRobb/dump1090 /tmp/dump1090
+          cd /tmp/dump1090
+          # Link Winsock for the _WIN32 network code.
+          make dump1090 CFLAGS="$(pkg-config --cflags librtlsdr) -DMISSING_GETTIMEOFDAY" \
+               LIBS="$(pkg-config --libs librtlsdr) -lws2_32 -lpthread" || make
+          test -f dump1090.exe
 
-      - name: Collect exe + runtime DLLs
-        shell: bash
+      - name: Bundle exe + runtime DLLs
         run: |
           set -euxo pipefail
           mkdir -p dist/dump1090-windows-amd64
-          find dump1090src/build -name 'dump1090.exe' -exec cp -v {} dist/dump1090-windows-amd64/ \;
-          find dump1090src/build -name '*.dll' -exec cp -v {} dist/dump1090-windows-amd64/ \; || true
-          test -f dist/dump1090-windows-amd64/dump1090.exe
+          cp /tmp/dump1090/dump1090.exe dist/dump1090-windows-amd64/
+          ldd /tmp/dump1090/dump1090.exe \
+            | awk '/\/mingw64\/bin\// {print $3}' \
+            | while read -r dll; do cp -v "$dll" dist/dump1090-windows-amd64/; done
           ls -la dist/dump1090-windows-amd64
 
       - name: Upload artifact
