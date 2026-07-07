@@ -1,4 +1,4 @@
-# Building the ADSBiq Airport installer
+# Building the Flightpatch installer
 
 The installer (`adsbiq-airport.iss`, Inno Setup 6) assembles a single
 `adsbiq-airport-setup-<ver>.exe` that installs the driver, the agent, the

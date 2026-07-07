@@ -9,7 +9,7 @@
 ; Build inputs live under installer\dist\ — see installer\BUILD.md for how to
 ; assemble them from the CI artifacts. Compile with: iscc adsbiq-airport.iss
 
-#define AppName "ADSBiq Airport Feeder"
+#define AppName "Flightpatch"
 #define AppVer "0.3.0"
 #define AppPublisher "ADSBiq"
 #define AppURL "https://adsbiq.com/airport"
