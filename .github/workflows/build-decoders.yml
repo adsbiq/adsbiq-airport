@@ -90,8 +90,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
 
-  # Silent WinUSB driver installer. libwdi is the engine behind Zadig; the MSYS2
-  # package ships the embedded driver co-installers, so no Windows WDK is needed.
+  # Silent WinUSB driver installer (wdi-simple.exe from libwdi — Zadig's engine).
+  # Built from source with the libwdi author's own mingw recipe: the WDK 8.0
+  # *redistributable* (a downloadable msi, not a full WDK install) supplies the
+  # driver co-installers, so no local WDK — which is what broke the earlier try.
   wdi-simple-windows:
     runs-on: windows-latest
     defaults:
@@ -105,23 +107,40 @@ jobs:
           update: true
           install: >-
             git
-            mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-pkgconf
-            mingw-w64-x86_64-libwdi
+            base-devel
+            autotools
+            mingw-w64-x86_64-toolchain
 
-      - name: Build wdi-simple.exe against packaged libwdi
+      - name: Fetch libwdi + driver redistributables
+        shell: cmd
+        run: |
+          git clone --depth 1 https://github.com/pbatard/libwdi
+          cd libwdi
+          curl -L "https://go.microsoft.com/fwlink/p/?LinkID=253170" -o wdk-redist.msi
+          curl -L "https://github.com/mcuee/libusb-win32/releases/download/release_1.4.0.0/libusb-win32-bin-1.4.0.0.zip" -o libusb0-redist.zip
+          curl -L "https://github.com/mcuee/libusbk/releases/download/V3.1.0.0/libusbK-3.1.0.0-bin.7z" -o libusbk-redist.7z
+          msiexec /a wdk-redist.msi /qn TARGETDIR=%CD%\wdk
+          7z x libusb0-redist.zip
+          7z x libusbk-redist.7z
+          move libusb-win32* libusb0
+          move libusbK* libusbk
+
+      - name: Build wdi-simple.exe
         run: |
           set -euxo pipefail
-          # wdi-simple.c is libwdi's example CLI; build it against the installed lib.
-          git clone --depth 1 https://github.com/pbatard/libwdi /tmp/libwdi
-          mkdir -p dist/wdi-simple-windows-amd64
-          gcc /tmp/libwdi/examples/wdi-simple.c -o dist/wdi-simple-windows-amd64/wdi-simple.exe \
-            $(pkg-config --cflags --libs libwdi) -lsetupapi -lole32
-          ldd dist/wdi-simple-windows-amd64/wdi-simple.exe \
+          cd libwdi
+          ./bootstrap.sh
+          ./configure --build=x86_64-w64-mingw32 --host=x86_64-w64-mingw32 \
+            --enable-toggable-debug --enable-examples-build --disable-debug --disable-shared --disable-32bit \
+            --with-wdkdir="wdk/Windows Kits/8.0" --with-wdfver=1011 \
+            --with-libusb0="libusb0" --with-libusbk="libusbk/bin"
+          make
+          mkdir -p ../dist/wdi-simple-windows-amd64
+          cp examples/wdi-simple.exe ../dist/wdi-simple-windows-amd64/
+          ldd examples/wdi-simple.exe \
             | awk '/\/mingw64\/bin\// {print $3}' \
-            | while read -r dll; do cp -v "$dll" dist/wdi-simple-windows-amd64/; done
-          ./dist/wdi-simple-windows-amd64/wdi-simple.exe --help || true
-          ls -la dist/wdi-simple-windows-amd64
+            | while read -r dll; do cp -v "$dll" ../dist/wdi-simple-windows-amd64/; done
+          ls -la ../dist/wdi-simple-windows-amd64
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
