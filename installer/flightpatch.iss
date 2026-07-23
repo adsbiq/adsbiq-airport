@@ -10,7 +10,7 @@
 ; assemble them from the CI artifacts. Compile with: iscc flightpatch.iss
 
 #define AppName "Flightpatch"
-#define AppVer "0.4.0"
+#define AppVer "0.4.1"
 #define AppPublisher "ADSBiq"
 #define AppURL "https://flightpatch.app/airport"
 ; RTL2832U (all RTL-SDR dongles): USB VID 0x0BDA, PID 0x2838
